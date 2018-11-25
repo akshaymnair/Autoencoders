@@ -98,9 +98,9 @@ def show(image, label):
 
 
 def main():
-    trX, trY, tsX1, tsY1 = mnist(noTrSamples=6000,
+    trX, trY, tsX1, tsY1 = mnist(noTrSamples=60000,
                                  noTsSamples=1400, digit_range=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-                                 noTrPerClass=600, noTsPerClass=700)
+                                 noTrPerClass=6000, noTsPerClass=700)
 
     trX, trY, tsX, tsY, vaX, vaY = mnist()
 
