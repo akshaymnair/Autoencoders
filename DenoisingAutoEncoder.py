@@ -1,5 +1,4 @@
 # Python 3
-# Author: Akshay - #1212981859
 
 import numpy as np
 from load_mnist import mnist
@@ -86,8 +85,9 @@ def layer_forward(A_prev, W, b, activation):
 def cost_estimate(A2, Y):
     ### CODE HERE
     # cost = np.linalg.norm(Y - A2, ord=2)  # take norm of the vector
-    cost = np.sum(Y * np.log(A2) + (1 - Y) * np.log(1 - A2))
-    cost = cost * (-1 / Y.shape[1])
+    #cost = np.sum(Y * np.log(A2) + (1 - Y) * np.log(1 - A2))
+    #cost = cost * (-1 / Y.shape[1])
+    cost=np.mean(np.square(np.subtract(A2,Y)))
     return cost
 
 
@@ -134,7 +134,7 @@ def two_layer_network(X, Y, net_dims, num_iterations=2000, learning_rate=0.1):
 
         # cost estimation
         ### CODE HERE
-        # cost = cost_estimate(A2, Y)
+        cost = cost_estimate(A2, Y)
 
         # Backward Propagation
         ### CODE HERE
@@ -156,10 +156,12 @@ def two_layer_network(X, Y, net_dims, num_iterations=2000, learning_rate=0.1):
         parameters["b1"] = parameters["b1"] - learning_rate * db1
         parameters["b2"] = parameters["b2"] - learning_rate * db2
 
-        # if ii % 10 == 0:
-        #     costs.append(cost)
+        if ii % 10 == 0:
+            costs.append(cost)
         if ii % 500 == 0:
-            print("Execution at: " + str(ii // 500 * 10) + "% !")
+            print("Execution at: " + str(ii // 500 * 20) + "% !")
+            print("cost: " + str(cost) + "% !")
+            
 
     return costs, parameters
 
@@ -174,7 +176,7 @@ def main():
     test_cols = test_label.shape[1]
 
     mean = 0.0
-    stddev = 0.1
+    stddev = 0.4
     noise = np.random.normal(mean, stddev, (n_rows, n_cols))
     trX_noisy = train_data + noise
     noise = np.random.normal(mean, stddev, (test_rows, test_cols))
@@ -197,8 +199,8 @@ def main():
     n_h = 1000
     net_dims = [n_in, n_h, n_fin]
     # initialize learning rate and num_iterations
-    learning_rate = 0.1
-    num_iterations = 5000
+    learning_rate = 0.2
+    num_iterations = 10000
 
     costs, parameters = two_layer_network(trX_noisy, train_data, net_dims, num_iterations=num_iterations,
                                           learning_rate=learning_rate)
@@ -207,20 +209,20 @@ def main():
     # train_Pred = classify(train_data, parameters)
 
     fig = plt.figure()
-    plt.imshow(test_data[:, 99].reshape(28, -1))
+    plt.imshow(test_data[:, 20].reshape(28, -1))
     plt.title("Test_Sample")
     plt.show()
     fig.savefig("Test_Sample")
 
     fig = plt.figure()
-    plt.imshow(tsX_noisy[:, 99].reshape(28, -1))
+    plt.imshow(tsX_noisy[:, 20].reshape(28, -1))
     plt.title("Noisy_Test_Sample")
     plt.show()
     fig.savefig("Noisy_Test_Sample")
 
     fig = plt.figure()
     test_Pred = denoise(tsX_noisy, parameters)
-    plt.imshow(test_Pred[:, 99].reshape(28, -1))
+    plt.imshow(test_Pred[:, 20].reshape(28, -1))
     plt.title("Denoised_Test_Sample")
     plt.show()
     fig.savefig("Denoised_Test_Sample")
