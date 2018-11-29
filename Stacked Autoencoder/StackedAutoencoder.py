@@ -1,23 +1,24 @@
 import numpy as np
-import scipy.io
+import argparse
 from load_fashion_mnist import load_fashion_mnist, separate_train_val_data
 from scipy.optimize import minimize
 from scipy.sparse import csr_matrix
 from SparseAutoencoder import SparseAutoencoder, sigmoid
 from time import time
-# from stackedAutoencoder_1 import SparseAutoencoder
 
 
 class StackedAutoencoder:
-    def __init__(self, input_size=784, hidden_layer_sizes=[500, 250, 100], output_size=10, max_iterations=1000):
+    def __init__(self, input_size=784, hidden_layer_sizes=[500, 250, 100], output_size=10, max_iterations=1000, method='L-BFGS-B'):
         self.max_iterations = max_iterations  # number of optimization iterations
         self.network_dims = [input_size] + hidden_layer_sizes + [output_size]
+        self.method = method
 
         self.rho = 0.1  # desired average activation of hidden units
         self.lamda = 0.003  # weight decay parameter
         self.beta = 3  # weight of sparsity penalty term
 
         self.list_auto_encoders = []
+        self.packed_auto_encoder_stack_with_softmax = []
 
     def softmaxCost(self, params, X, labels):
 
@@ -36,24 +37,37 @@ class StackedAutoencoder:
 
         return [cost, gradient]
 
-    def predict(self, result, X):
+    def predict(self, X, classifier, weights_biases=None):
+        classifier = classifier.reshape(self.network_dims[-1], self.network_dims[-2])
         activation = X
-        for autoencoder in self.list_auto_encoders:
-            activation = sigmoid(np.dot(autoencoder.W1, activation) + autoencoder.b1)
-        hypothesis = np.exp(np.dot(result, activation))
+        if weights_biases is None:
+            for autoencoder in self.list_auto_encoders:
+                activation = sigmoid(np.dot(autoencoder.W1, activation) + autoencoder.b1)
+        else:
+            start = 0
+            for autoencoder in self.list_auto_encoders:
+                W_limits = (start, start + autoencoder.hidden_size * autoencoder.input_size)
+                b_limits = (W_limits[1], W_limits[1] + autoencoder.hidden_size)
+                W = weights_biases[W_limits[0]: W_limits[1]].reshape(autoencoder.hidden_size, autoencoder.input_size)
+                b = weights_biases[b_limits[0]: b_limits[1]].reshape(autoencoder.hidden_size, 1)
+                start = b_limits[1]
+                activation = sigmoid(np.dot(W, activation) + b)
+        hypothesis = np.exp(np.dot(classifier, activation))
         probs = hypothesis / np.sum(hypothesis, axis=0)
         preds = np.zeros((X.shape[1], 1))
         preds[:, 0] = np.argmax(probs, axis=0)
         return preds
 
-    def packSoftmaxWeightsAndBiases(self, softmax_pack, weights_biases=None):
-        packed = np.concatenate(([], softmax_pack.flatten()))
-        if not weights_biases:
+    def packSoftmaxWeightsAndBiases(self, softmax_pack=None, weights_biases=None):
+        packed = []
+        if not softmax_pack is None:
+            packed = np.concatenate((packed, np.array(softmax_pack).flatten()))
+        if weights_biases is None:
             for auto_encoder in self.list_auto_encoders:
-                packed = np.concatenate((packed, auto_encoder.W1.flatten(), auto_encoder.b1.flatten()))
+                packed = np.concatenate((packed, np.array(auto_encoder.W1).flatten(), np.array(auto_encoder.b1).flatten()))
         else:
-            for w, b in weights_biases:
-                packed = np.concatenate((packed, w.flatten(), b.flatten()))
+            for (w, b) in weights_biases:
+                packed = np.concatenate((packed, np.array(w).flatten(), np.array(b).flatten()))
         return packed
 
     def unpackSoftmaxWeightsAndBiases(self, pack):
@@ -70,11 +84,17 @@ class StackedAutoencoder:
         return classifier, unpacked_wb
 
     def findAccuracy(self, X, Y, min_func_name, min_x0, **kwargs):
-        solution = minimize(min_func_name, min_x0, args=kwargs.values()[0], method='L-BFGS-B', jac=True,
+        solution = minimize(min_func_name, min_x0, args=kwargs.values()[0], method=self.method, jac=True,
                             options={'maxiter': self.max_iterations, 'disp': True})
-        prediction = self.predict(solution.x, X)
+        solution = solution.x
+        if 'StackedAutoencoder.softmaxCost' in str(min_func_name):
+            self.packed_auto_encoder_stack_with_softmax = self.packSoftmaxWeightsAndBiases(solution)
+            prediction = self.predict(X, solution)
+        else:
+            classifier_length = self.network_dims[-1] * self.network_dims[-2]
+            prediction = self.predict(X, solution[0:classifier_length], solution[classifier_length:])
         test_accuracy = Y[:, 0] == prediction[:, 0]
-        return solution.x, np.mean(test_accuracy)
+        return np.mean(test_accuracy)
 
     def sample_finetuning_data(self, trX, trY, samples_per_class=1):
         total_data_size, no_of_classes = trX.shape[-1], self.network_dims[-1]
@@ -88,7 +108,7 @@ class StackedAutoencoder:
             sparse_encoder = SparseAutoencoder(self.network_dims[i-1], self.network_dims[i], self.rho, self.lamda, self.beta)
             packed_inputs = sparse_encoder.packWeightsBiases()
             opt_packed_params = minimize(fun=sparse_encoder.cost, x0=packed_inputs, args=(activation, ), jac=True,
-                                            method='L-BFGS-B', options={'maxiter': self.max_iterations, 'disp': True})
+                                            method=self.method, options={'maxiter': self.max_iterations, 'disp': True})
             sparse_encoder.unpackWeightsBiases(opt_packed_params.x)
             self.list_auto_encoders.append(sparse_encoder)
             activation = 1. / (1 + np.exp(-(np.dot(sparse_encoder.W1, activation) + sparse_encoder.b1)))
@@ -96,16 +116,16 @@ class StackedAutoencoder:
 
         rand = np.random.RandomState(np.random.seed(int(time())))
         softmax_x0 = 0.005 * np.asarray(rand.normal(size=(self.network_dims[-1]*self.network_dims[-2], 1)))
-        softmax_pack, trAcc = self.findAccuracy(tsX, tsY, self.softmaxCost, softmax_x0, accuracy_type='training & softmax',
+        trAcc = self.findAccuracy(tsX, tsY, self.softmaxCost, softmax_x0, accuracy_type='training & softmax',
                                          kwargs=(activation, trY))
         print "Accuracy after training & softmax = {0}".format(trAcc)
 
-        packed_auto_encoder_stack_with_softmax = self.packSoftmaxWeightsAndBiases()
+
         ftX_5, ftY_5 = self.sample_finetuning_data(trX, trY, samples_per_class=5)
         ftX_1, ftY_1 = self.sample_finetuning_data(ftX_5, ftY_5, samples_per_class=1)
-        _, ftAcc1 = self.findAccuracy(tsX, tsY, self.stackedAutoencoderCost, packed_auto_encoder_stack_with_softmax,
+        ftAcc1 = self.findAccuracy(tsX, tsY, self.stackedAutoencoderCost, self.packed_auto_encoder_stack_with_softmax,
                                       kwargs=(ftX_1, ftY_1))
-        _, ftAcc5 = self.findAccuracy(tsX, tsY, self.stackedAutoencoderCost, packed_auto_encoder_stack_with_softmax,
+        ftAcc5 = self.findAccuracy(tsX, tsY, self.stackedAutoencoderCost, self.packed_auto_encoder_stack_with_softmax,
                                       kwargs=(ftX_5, ftY_5))
         print "Accuracy after fine-tuning with 1-labeled samples per class = {0}".format(ftAcc1)
         print "Accuracy after fine-tuning with 5-labeled samples per class = {0}".format(ftAcc5)
@@ -156,8 +176,17 @@ def getGroundTruth(Y):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-l', '--hidden', type=str, default="[500, 200, 100]")
+    parser.add_argument('-e', '--epochs', type=int, default=200)
+    parser.add_argument('-m', '--method', type=str, default='L-BFGS-B')
+    parser.add_argument('-i', '--input', type=int, default=784)
+    parser.add_argument('-o', '--output', type=int, default=10)
+    args = parser.parse_args()
+    hidden_layers = [int(h) for h in args.hidden.strip('[').strip(']').split(',' if ',' in args.hidden else ' ')]
     trX, trY, tsX, tsY = load_fashion_mnist()
-    sae = StackedAutoencoder(max_iterations=100)
+    sae = StackedAutoencoder(input_size=args.input, hidden_layer_sizes=hidden_layers, output_size=args.output,
+                             max_iterations=args.epochs, method=args.method)
     sae.runStackedAutoencoder(trX, trY, tsX, tsY)
 
 
