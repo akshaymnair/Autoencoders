@@ -158,17 +158,18 @@ def two_layer_network(X, Y, net_dims, num_iterations=2000, learning_rate=0.1):
 
         if ii % 10 == 0:
             costs.append(cost)
-        if ii % 500 == 0:
-            print("Execution at: " + str(ii // 500 * 20) + "% !")
+        if ii % 100 == 0:
+            print("Execution at: " + str(ii // 100 * 10) + "% !")
             print("cost: " + str(cost) + "% !")
-            
 
     return costs, parameters
 
 
 def main():
     start_time = time.time()
-    train_data, train_label, test_data, test_label = mnist()
+    train_data, train_label, test_data, test_label = mnist(noTrSamples=60000, noTsSamples=10000,
+                                                       digit_range=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                                                       noTrPerClass=6000, noTsPerClass=1000)
     # print(param)
     n_rows = train_data.shape[0]
     n_cols = train_data.shape[1]
@@ -199,8 +200,8 @@ def main():
     n_h = 1000
     net_dims = [n_in, n_h, n_fin]
     # initialize learning rate and num_iterations
-    learning_rate = 0.2
-    num_iterations = 10000
+    learning_rate = 1
+    num_iterations = 1000
 
     costs, parameters = two_layer_network(trX_noisy, train_data, net_dims, num_iterations=num_iterations,
                                           learning_rate=learning_rate)
@@ -209,20 +210,20 @@ def main():
     # train_Pred = classify(train_data, parameters)
 
     fig = plt.figure()
-    plt.imshow(test_data[:, 20].reshape(28, -1))
+    plt.imshow(test_data[:, 9999].reshape(28, -1))
     plt.title("Test_Sample")
     plt.show()
     fig.savefig("Test_Sample")
 
     fig = plt.figure()
-    plt.imshow(tsX_noisy[:, 20].reshape(28, -1))
+    plt.imshow(tsX_noisy[:, 9999].reshape(28, -1))
     plt.title("Noisy_Test_Sample")
     plt.show()
     fig.savefig("Noisy_Test_Sample")
 
     fig = plt.figure()
     test_Pred = denoise(tsX_noisy, parameters)
-    plt.imshow(test_Pred[:, 20].reshape(28, -1))
+    plt.imshow(test_Pred[:, 9999].reshape(28, -1))
     plt.title("Denoised_Test_Sample")
     plt.show()
     fig.savefig("Denoised_Test_Sample")
