@@ -9,7 +9,7 @@ train_data, train_label, test_data, test_label = mnist(noTrSamples=60000, noTsSa
                                                        digit_range=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                                                        noTrPerClass=6000, noTsPerClass=1000)
 
-print(train_data.shape, test_data.shape)
+# print(train_data.shape, test_data.shape)
 
 # plt.figure()
 # plt.imshow(train_data[:, 0].reshape(28, -1), cmap=plt.cm.binary)
@@ -55,4 +55,3 @@ with open('BaseLine_NeuralNet.txt', 'a') as file:
     file.write('\nTest Accuracy: ' + str(test_acc))
     file.write('\n')
     file.write('==' * 50)
-

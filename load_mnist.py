@@ -81,7 +81,7 @@ def show(image, label):
     for i in range(1, columns * rows + 1):
         fig.add_subplot(rows, columns, i)
         plt.imshow(image[:, i].reshape(28, -1))
-        print(label[:,i])
+        print(label[:, i])
     plt.show()
 
 
@@ -108,7 +108,7 @@ def main():
     print("Test sets: ", tsY.shape, tsX.shape)
     print("Train sets: ", trY.shape, trX.shape)
 
-    show(vaX,vaY)
+    show(vaX, vaY)
     # plt.imshow(vaX[:, 4].reshape(28, -1))
     # plt.show()
     # print(vaY[0, 4])
