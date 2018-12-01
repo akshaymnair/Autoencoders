@@ -6,6 +6,7 @@ from scipy.sparse import csr_matrix
 
 
 mnist_dir = 'fashion-mnist'
+figures_dir = 'figures'
 
 
 def sigmoid(x):
