@@ -1,8 +1,5 @@
 import numpy as np
-
-
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+from HelperFunctions import sigmoid
 
 
 class SparseAutoencoder:
@@ -18,6 +15,7 @@ class SparseAutoencoder:
         self.W2 = np.array(rand.uniform(-dist_range, dist_range, (input_size, hidden_size)))
         self.b1 = np.zeros((hidden_size, 1))
         self.b2 = np.zeros((input_size, 1))
+        self.features = None
         self.costs = []
 
     def packWeightsBiases(self, pack_self=True, W1=None, W2=None, b1=None, b2=None):
@@ -38,7 +36,7 @@ class SparseAutoencoder:
             self.W1, self.W2, self.b1, self.b2 = W1, W2, b1, b2
         return W1, W2, b1, b2
 
-    def cost(self, packed_weights_biases, X):
+    def fit(self, packed_weights_biases, X):
         W1, W2, b1, b2 = self.unpackWeightsBiases(packed_weights_biases, self_assign=False)
 
         hidden_activation = sigmoid(np.dot(W1, X) + b1)
