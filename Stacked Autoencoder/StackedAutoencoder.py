@@ -197,17 +197,26 @@ def SDA(show_cost_graph=True):
 
 
     trX, trY, tsX, tsY = helper.loadFashionMNIST()
-    ftX_5, ftY_5 = helper.filterMNIST(trX, trY, 5)
     ftX_1, ftY_1 = helper.filterMNIST(trX, trY, 1)
+    ftX_5, ftY_5 = helper.filterMNIST(trX, trY, 5)
+    ftX_20, ftY_20 = helper.filterMNIST(trX, trY, 20)
+    ftX_50, ftY_50 = helper.filterMNIST(trX, trY, 50)
+    ftX_100, ftY_100 = helper.filterMNIST(trX, trY, 100)
     sae = StackedAutoencoder(input_size=args.input, hidden_layer_sizes=hidden_layers, output_size=args.output,
                               max_iterations=args.epochs, method=args.method)
     trAcc = sae.fit(trX, trY, tsX, tsY)
     ftAcc1 = sae.fineTune(ftX_1, ftY_1, tsX, tsY, spc=1)
     ftAcc5 = sae.fineTune(ftX_5, ftY_5, tsX, tsY, spc=5)
+    ftAcc20 = sae.fineTune(ftX_20, ftY_20, tsX, tsY, spc=20)
+    ftAcc50 = sae.fineTune(ftX_50, ftY_50, tsX, tsY, spc=50)
+    ftAcc100 = sae.fineTune(ftX_100, ftY_100, tsX, tsY, spc=100)
     ftAcc = sae.fineTune(trX, trY, tsX, tsY, spc='all')
     print("Accuracy after training & softmax for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), trAcc))
     print("Accuracy after fine-tuning with 1-labeled SPC for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc1))
     print("Accuracy after fine-tuning with 5-labeled SPC for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc5))
+    print("Accuracy after fine-tuning with 20-labeled SPC for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc20))
+    print("Accuracy after fine-tuning with 50-labeled SPC for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc50))
+    print("Accuracy after fine-tuning with 100-labeled SPC for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc100))
     print("Accuracy after fine-tuning with fullly labeled SPC  for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc))
     if show_cost_graph:
         title = 'Training Cost vs Iteration - {0} epochs and {1} hidden layers'.format(args.epochs, str(args.hidden))
