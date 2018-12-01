@@ -24,8 +24,8 @@ def tanh_der(dA, cache):
 
 
 def sigmoid(Z):
-    e=0.00000000001
-    A = 1 / (1 + np.exp(-Z+e))
+    e = 0.00000000001
+    A = 1 / (1 + np.exp(-Z + e))
     cache = {}
     cache["Z"] = Z
     return A, cache
@@ -197,35 +197,35 @@ def masking_noise(X, v):
     return X_noise
 
 
-
-def get_corrupted_input( input, stddev):
+def get_corrupted_input(input, stddev):
     noise = np.random.normal(0, stddev, (input.shape[0], input.shape[1]))
-    #assert corruption_level < 1
-    #return np.binomial(size=input.shape, n=1,p=1-corruption_level) * input
-    return (input+noise*0.1)
+    # assert corruption_level < 1
+    # return np.binomial(size=input.shape, n=1,p=1-corruption_level) * input
+    return (input + noise * 0.1)
+
 
 def main():
     start_time = time.time()
     train_data, train_label, test_data, test_label = mnist()
     # print(param)
-   # n_rows = train_data.shape[0]
-    #n_cols = train_data.shape[1]
-    #test_rows = test_data.shape[0]
-    #test_cols = test_label.shape[1]
+    # n_rows = train_data.shape[0]
+    # n_cols = train_data.shape[1]
+    # test_rows = test_data.shape[0]
+    # test_cols = test_label.shape[1]
 
-   # mean = 0.0
-    #stddev = 0.4
-    #noise = np.random.normal(mean, stddev, (n_rows, n_cols))
-    #trX_noisy = train_data + noise
-    #noise = np.random.normal(mean, stddev, (test_rows, test_cols))
-    #tsX_noisy = test_data + noise
-    noise=0.1
-    testnoise1=0.2
-    testnoise2=0.3
-    testnoise3=0.4
-    testnoise4=0.5
-    trX_noisy = get_corrupted_input(train_data,noise)
-    tsX_noisy1 =get_corrupted_input(test_data,testnoise1)
+    # mean = 0.0
+    # stddev = 0.4
+    # noise = np.random.normal(mean, stddev, (n_rows, n_cols))
+    # trX_noisy = train_data + noise
+    # noise = np.random.normal(mean, stddev, (test_rows, test_cols))
+    # tsX_noisy = test_data + noise
+    noise = 0.1
+    testnoise1 = 0.2
+    testnoise2 = 0.3
+    testnoise3 = 0.4
+    testnoise4 = 0.5
+    trX_noisy = get_corrupted_input(train_data, noise)
+    tsX_noisy1 = get_corrupted_input(test_data, testnoise1)
     tsX_noisy2 = get_corrupted_input(test_data, testnoise2)
     tsX_noisy3 = get_corrupted_input(test_data, testnoise3)
     tsX_noisy4 = get_corrupted_input(test_data, testnoise4)
@@ -257,37 +257,37 @@ def main():
     # train_Pred = classify(train_data, parameters)
 
     fig = plt.figure()
-    plt.imshow(test_data[:, 50].reshape(28, -1),cmap=plt.cm.binary)
+    plt.imshow(test_data[:, 50].reshape(28, -1), cmap=plt.cm.binary)
     plt.title("Test_Sample")
     plt.show()
     fig.savefig("Test_Sample")
 
     fig = plt.figure()
-    plt.imshow(tsX_noisy1[:, 50].reshape(28, -1),cmap=plt.cm.binary)
-    plt.title("Noisy_Test_Sample 1 with binomial noise:testnoise1")
+    plt.imshow(tsX_noisy1[:, 50].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample1_with_binomial_noise_testnoise1")
     plt.show()
-    fig.savefig("Noisy_Test_Sample 1 with binomial noise:testnoise1")
+    fig.savefig("Noisy_Test_Sample1_with_binomial_noise_testnoise1")
     fig = plt.figure()
-    plt.imshow(tsX_noisy2[:, 50].reshape(28, -1),cmap=plt.cm.binary)
-    plt.title("Noisy_Test_Sample 2 with binomial noise :testnoise2")
+    plt.imshow(tsX_noisy2[:, 50].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample 2 with binomial noise_testnoise2")
     plt.show()
-    fig.savefig("Noisy_Test_Sample 2 with binomial noise:testnoise2")
+    fig.savefig("Noisy_Test_Sample2_with_binomial_noise_testnoise2")
 
     fig = plt.figure()
     plt.imshow(tsX_noisy3[:, 10].reshape(28, -1), cmap=plt.cm.binary)
     plt.title("Noisy_Test_Sample 3 with  binomial noise:testnoise3")
     plt.show()
-    fig.savefig("Noisy_Test_Sample 3 with  binomial noise:testnoise3")
+    fig.savefig("Noisy_Test_Sample_3_with _binomial_noise_testnoise3")
 
     fig = plt.figure()
 
-    plt.imshow(tsX_noisy4[:, 50].reshape(28, -1),cmap=plt.cm.binary)
+    plt.imshow(tsX_noisy4[:, 50].reshape(28, -1), cmap=plt.cm.binary)
     plt.title("Noisy_Test_Sample 4 with binomial noise:testnoise4")
     plt.show()
-    fig.savefig("Noisy_Test_Sample 4 with binomial noise:testnoise4")
+    fig.savefig("Noisy_Test_Sample4_with_binomial_noise_testnoise4")
 
     test_Pred1 = denoise(tsX_noisy1, parameters)
-    test_Pred2= denoise(tsX_noisy2, parameters)
+    test_Pred2 = denoise(tsX_noisy2, parameters)
     test_Pred3 = denoise(tsX_noisy3, parameters)
     test_Pred4 = denoise(tsX_noisy4, parameters)
     print("accuracy of test sample 1 with  binomial noise" + str(testnoise1) + "is  " + str(
@@ -299,34 +299,34 @@ def main():
     print("accuracy of test sample 4 with binomial noise" + str(testnoise4) + "is  " + str(
         (1 - error(test_Pred4, test_data)) * 100) + "%")
     fig = plt.figure()
-    plt.imshow(test_Pred1[:, 50].reshape(28, -1),cmap=plt.cm.binary)
+    plt.imshow(test_Pred1[:, 50].reshape(28, -1), cmap=plt.cm.binary)
     plt.title("Denoised_binomial noise Test_Sample1")
     plt.show()
     fig.savefig("Denoised_binomial noise_Test_Sample1")
     fig = plt.figure()
-    plt.imshow(test_Pred2[:, 50].reshape(28, -1),cmap=plt.cm.binary)
+    plt.imshow(test_Pred2[:, 50].reshape(28, -1), cmap=plt.cm.binary)
     plt.title("Denoised_binomial noiseTest_Sample2")
     plt.show()
     fig.savefig("Denoised_binomial noiseTest_Sample2")
     fig = plt.figure()
-    plt.imshow(test_Pred3[:, 50].reshape(28, -1),cmap=plt.cm.binary)
+    plt.imshow(test_Pred3[:, 50].reshape(28, -1), cmap=plt.cm.binary)
     plt.title("Denoised_binomial noiseTest_Sample3")
     plt.show()
     fig.savefig("Denoised_binomial noiseTest_Sample3")
     fig = plt.figure()
-    plt.imshow(test_Pred4[:, 50].reshape(28, -1),cmap=plt.cm.binary)
+    plt.imshow(test_Pred4[:, 50].reshape(28, -1), cmap=plt.cm.binary)
     plt.title("Denoised_binomial noiseTest_Sample4")
     plt.show()
     fig.savefig("Denoised_binomial noiseTest_Sample4")
 
     plt.plot(costs, label='Training cost')
 
-
     plt.title("training cost with learning rate =" + str(learning_rate) + "iterations" + str(
-    num_iterations) + "noise :" + str(noise))
+        num_iterations) + "noise :" + str(noise))
     plt.show()
-    fig.savefig("training cost")
+    fig.savefig("trainingCost")
     print("Total execution time: %s minutes!!" % ((time.time() - start_time) // 60))
+
 
 if __name__ == "__main__":
     main()
