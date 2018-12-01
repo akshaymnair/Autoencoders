@@ -160,6 +160,7 @@ class StackedAutoencoder:
         plt.xlabel('Iterations -->')
         plt.ylabel('Training Cost -->')
         plt.title(title)
+        plt.xscale('log')
         plt.legend(title='Sparse Autoencoder', fancybox=True, fontsize='x-small')
         if not os.path.exists(helper.figures_dir):
             os.makedirs(helper.figures_dir)
