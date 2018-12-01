@@ -1,4 +1,5 @@
 # Python 3
+# Author: Akshay - #1212981859
 
 import numpy as np
 from load_mnist import mnist
@@ -85,11 +86,19 @@ def layer_forward(A_prev, W, b, activation):
 def cost_estimate(A2, Y):
     ### CODE HERE
     # cost = np.linalg.norm(Y - A2, ord=2)  # take norm of the vector
-    # cost = np.sum(Y * np.log(A2) + (1 - Y) * np.log(1 - A2))
-    # cost = cost * (-1 / Y.shape[1])
-    cost = np.mean(np.square(np.subtract(A2, Y)))
+    #cost = np.sum(Y * np.log(A2) + (1 - Y) * np.log(1 - A2))
+    #cost = cost * (-1 / Y.shape[1])
+    cost=np.mean(np.square(np.subtract(A2,Y)))
     return cost
 
+
+def error(A2, Y):
+    ### CODE HERE
+    # cost = np.linalg.norm(Y - A2, ord=2)  # take norm of the vector
+    #cost = np.sum(Y * np.log(A2) + (1 - Y) * np.log(1 - A2))
+    #cost = cost * (-1 / Y.shape[1])
+    cost=np.mean(np.square(np.subtract(A2,Y)))
+    return cost
 
 def linear_backward(dZ, cache, W, b):
     # CODE HERE
@@ -115,7 +124,7 @@ def layer_backward(dA, cache, W, b, activation):
 
 def denoise(X, parameters):
     ### CODE HERE
-    A1, cache1 = layer_forward(X, parameters["W1"], parameters["b1"], 'tanh')
+    A1, cache1 = layer_forward(X, parameters["W1"], parameters["b1"], 'sigmoid')
     YPred, cache2 = layer_forward(A1, parameters["W2"], parameters["b2"], 'sigmoid')
     return YPred
 
@@ -129,7 +138,7 @@ def two_layer_network(X, Y, net_dims, num_iterations=2000, learning_rate=0.1):
     for ii in range(num_iterations):
         # Forward propagation
         ### CODE HERE
-        A1, cache1 = layer_forward(A0, parameters["W1"], parameters["b1"], 'tanh')
+        A1, cache1 = layer_forward(A0, parameters["W1"], parameters["b1"], 'sigmoid')
         A2, cache2 = layer_forward(A1, parameters["W2"], parameters["b2"], 'sigmoid')
 
         # cost estimation
@@ -145,7 +154,7 @@ def two_layer_network(X, Y, net_dims, num_iterations=2000, learning_rate=0.1):
             dA2 = 1.0 / m * (np.divide(-1 * Y, A2 + epsilon) + np.divide(1 - Y, 1 - A2 + epsilon))
 
         dA_prev2, dW2, db2 = layer_backward(dA2, cache2, parameters["W2"], parameters["b2"], 'sigmoid')
-        dA_prev1, dW1, db1 = layer_backward(dA_prev2, cache1, parameters["W1"], parameters["b2"], 'tanh')
+        dA_prev1, dW1, db1 = layer_backward(dA_prev2, cache1, parameters["W1"], parameters["b2"], 'sigmoid')
 
         # update parameters
         ### CODE HERE
@@ -157,19 +166,17 @@ def two_layer_network(X, Y, net_dims, num_iterations=2000, learning_rate=0.1):
         parameters["b2"] = parameters["b2"] - learning_rate * db2
 
         if ii % 10 == 0:
-            costs.append(cost)
-        if ii % 100 == 0:
-            print("Execution at: " + str(ii // 100 * 10) + "% !")
-            print("cost: " + str(cost) + "% !")
+             costs.append(cost)
+        if ii % 500 == 0:
+            print("Execution at iteration: " + str(ii ) + "!")
+            print("cost: " + str(cost) + "!")
 
     return costs, parameters
 
 
 def main():
     start_time = time.time()
-    train_data, train_label, test_data, test_label = mnist(noTrSamples=60000, noTsSamples=10000,
-                                                           digit_range=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-                                                           noTrPerClass=6000, noTsPerClass=1000)
+    train_data, train_label, test_data, test_label = mnist()
     # print(param)
     n_rows = train_data.shape[0]
     n_cols = train_data.shape[1]
@@ -177,7 +184,7 @@ def main():
     test_cols = test_label.shape[1]
 
     mean = 0.0
-    stddev = 0.2
+    stddev = 0.4
     noise = np.random.normal(mean, stddev, (n_rows, n_cols))
     trX_noisy = train_data + noise
     noise = np.random.normal(mean, stddev, (test_rows, test_cols))
@@ -210,24 +217,30 @@ def main():
     # train_Pred = classify(train_data, parameters)
 
     fig = plt.figure()
-    plt.imshow(test_data[:, 9999].reshape(28, -1), cmap=plt.cm.binary)
+    plt.imshow(test_data[:, 99].reshape(28, -1))
     plt.title("Test_Sample")
     plt.show()
     fig.savefig("Test_Sample")
 
     fig = plt.figure()
-    plt.imshow(tsX_noisy[:, 9999].reshape(28, -1), cmap=plt.cm.binary)
+    plt.imshow(tsX_noisy[:, 99].reshape(28, -1))
     plt.title("Noisy_Test_Sample")
     plt.show()
     fig.savefig("Noisy_Test_Sample")
 
     fig = plt.figure()
     test_Pred = denoise(tsX_noisy, parameters)
-    plt.imshow(test_Pred[:, 9999].reshape(28, -1), cmap=plt.cm.binary)
+    print("error of test sample" ,(error(test_Pred,test_data)))
+    plt.imshow(test_Pred[:, 99].reshape(28, -1))
     plt.title("Denoised_Test_Sample")
     plt.show()
     fig.savefig("Denoised_Test_Sample")
-    print("Total execution time: %s minutes!!" % ((time.time() - start_time) // 60))
+	
+	plt.plot(costs, label = 'Training cost')
+    plt.title("training cost with learning rate =" + str(learning_rate)+"iterations"+str(num_iterations)+"noise stddev:"+str(stddev))
+    plt.show()
+	fig.savefig("training cost")
+    print("Total execution time: %s minutes!!" % ((time.time() - start_time)//60))
 
 
 if __name__ == "__main__":

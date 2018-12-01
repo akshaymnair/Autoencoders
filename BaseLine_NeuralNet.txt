@@ -1,0 +1,7 @@
+
+Testing Parameters 
+
+Hidden Layer Sizes: 500 >> 200 >> 100
+Activations: sigmoid
+Test Accuracy: 0.8758
+====================================================================================================

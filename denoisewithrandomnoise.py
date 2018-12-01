@@ -1,4 +1,5 @@
 # Python 3
+# Author: Akshay - #1212981859
 
 import numpy as np
 from load_mnist import mnist
@@ -91,6 +92,15 @@ def cost_estimate(A2, Y):
     return cost
 
 
+def error(A2, Y):
+    ### CODE HERE
+    # cost = np.linalg.norm(Y - A2, ord=2)  # take norm of the vector
+    # cost = np.sum(Y * np.log(A2) + (1 - Y) * np.log(1 - A2))
+    # cost = cost * (-1 / Y.shape[1])
+    cost = np.mean(np.square(np.subtract(A2, Y)))
+    return cost
+
+
 def linear_backward(dZ, cache, W, b):
     # CODE HERE
     A = cache["A"]
@@ -115,7 +125,7 @@ def layer_backward(dA, cache, W, b, activation):
 
 def denoise(X, parameters):
     ### CODE HERE
-    A1, cache1 = layer_forward(X, parameters["W1"], parameters["b1"], 'tanh')
+    A1, cache1 = layer_forward(X, parameters["W1"], parameters["b1"], 'sigmoid')
     YPred, cache2 = layer_forward(A1, parameters["W2"], parameters["b2"], 'sigmoid')
     return YPred
 
@@ -129,7 +139,7 @@ def two_layer_network(X, Y, net_dims, num_iterations=2000, learning_rate=0.1):
     for ii in range(num_iterations):
         # Forward propagation
         ### CODE HERE
-        A1, cache1 = layer_forward(A0, parameters["W1"], parameters["b1"], 'tanh')
+        A1, cache1 = layer_forward(A0, parameters["W1"], parameters["b1"], 'sigmoid')
         A2, cache2 = layer_forward(A1, parameters["W2"], parameters["b2"], 'sigmoid')
 
         # cost estimation
@@ -145,7 +155,7 @@ def two_layer_network(X, Y, net_dims, num_iterations=2000, learning_rate=0.1):
             dA2 = 1.0 / m * (np.divide(-1 * Y, A2 + epsilon) + np.divide(1 - Y, 1 - A2 + epsilon))
 
         dA_prev2, dW2, db2 = layer_backward(dA2, cache2, parameters["W2"], parameters["b2"], 'sigmoid')
-        dA_prev1, dW1, db1 = layer_backward(dA_prev2, cache1, parameters["W1"], parameters["b2"], 'tanh')
+        dA_prev1, dW1, db1 = layer_backward(dA_prev2, cache1, parameters["W1"], parameters["b2"], 'sigmoid')
 
         # update parameters
         ### CODE HERE
@@ -158,30 +168,64 @@ def two_layer_network(X, Y, net_dims, num_iterations=2000, learning_rate=0.1):
 
         if ii % 10 == 0:
             costs.append(cost)
-        if ii % 100 == 0:
-            print("Execution at: " + str(ii // 100 * 10) + "% !")
-            print("cost: " + str(cost) + "% !")
+        if ii % 500 == 0:
+            print("Execution at iteration: " + str(ii) + "!")
+            print("cost: " + str(cost) + "!")
 
     return costs, parameters
 
 
+def masking_noise(X, v):
+    """ Apply masking noise to data in X, in other words a fraction v of elements of X
+    (chosen at random) is forced to zero.
+    :param X: array_like, Input data
+    :param v: int, fraction of elements to distort
+    :return: transformed data
+    """
+    X_noise = X.copy()
+
+    n_samples = X.shape[0]
+    n_features = X.shape[1]
+
+    for i in range(n_samples):
+        mask = np.random.randint(0, n_features, v)
+
+        for m in mask:
+            X_noise[i][m] = 0.
+
+    return X_noise
+
+
+def get_corrupted_input(self, input, corruption_level):
+    assert corruption_level < 1
+    return self.numpy_rng.binomial(size=input.shape, n=1, p=1 - corruption_level) * input
+
+
 def main():
     start_time = time.time()
-    train_data, train_label, test_data, test_label = mnist(noTrSamples=60000, noTsSamples=10000,
-                                                           digit_range=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-                                                           noTrPerClass=6000, noTsPerClass=1000)
+    train_data, train_label, test_data, test_label = mnist()
     # print(param)
     n_rows = train_data.shape[0]
     n_cols = train_data.shape[1]
     test_rows = test_data.shape[0]
     test_cols = test_label.shape[1]
 
-    mean = 0.0
-    stddev = 0.2
-    noise = np.random.normal(mean, stddev, (n_rows, n_cols))
-    trX_noisy = train_data + noise
-    noise = np.random.normal(mean, stddev, (test_rows, test_cols))
-    tsX_noisy = test_data + noise
+    # mean = 0.0
+    # stddev = 0.4
+    # noise = np.random.normal(mean, stddev, (n_rows, n_cols))
+    # trX_noisy = train_data + noise
+    # noise = np.random.normal(mean, stddev, (test_rows, test_cols))
+    # tsX_noisy = test_data + noise
+    noise = 4
+    testnoise1 = 3
+    testnoise2 = 2
+    testnoise3 = 4
+    testnoise4 = 5
+    trX_noisy = masking_noise(train_data, noise)
+    tsX_noisy1 = masking_noise(test_data, testnoise1)
+    tsX_noisy2 = masking_noise(test_data, testnoise2)
+    tsX_noisy3 = masking_noise(test_data, testnoise3)
+    tsX_noisy4 = masking_noise(test_data, testnoise4)
 
     # fig = plt.figure()
     # plt.imshow(train_data[:, 999].reshape(28, -1))
@@ -210,23 +254,68 @@ def main():
     # train_Pred = classify(train_data, parameters)
 
     fig = plt.figure()
-    plt.imshow(test_data[:, 9999].reshape(28, -1), cmap=plt.cm.binary)
+    plt.imshow(test_data[:, 10].reshape(28, -1), cmap=plt.cm.binary)
     plt.title("Test_Sample")
     plt.show()
     fig.savefig("Test_Sample")
 
     fig = plt.figure()
-    plt.imshow(tsX_noisy[:, 9999].reshape(28, -1), cmap=plt.cm.binary)
-    plt.title("Noisy_Test_Sample")
+    plt.imshow(tsX_noisy1[:, 10].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample1with_noise_" + str(testnoise1))
     plt.show()
-    fig.savefig("Noisy_Test_Sample")
+    fig.savefig("Noisy_Test_Sample1_with_noise_" + str(testnoise1))
+    fig = plt.figure()
+    plt.imshow(tsX_noisy2[:, 10].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample2_with_noise_" + str(testnoise2))
+    plt.show()
+    fig.savefig("Noisy_Test_Sample2_with_noise_" + str(testnoise2))
+    fig = plt.figure()
+    plt.imshow(tsX_noisy3[:, 10].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample3_with_noise_" + str(testnoise3))
+    plt.show()
+    fig.savefig("Noisy_Test_Sample3_with_noise_" + str(testnoise3))
 
     fig = plt.figure()
-    test_Pred = denoise(tsX_noisy, parameters)
-    plt.imshow(test_Pred[:, 9999].reshape(28, -1), cmap=plt.cm.binary)
-    plt.title("Denoised_Test_Sample")
+    plt.imshow(tsX_noisy4[:, 10].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample4_with_noise_" + str(testnoise4))
     plt.show()
-    fig.savefig("Denoised_Test_Sample")
+    fig.savefig("Noisy_Test_Sample4_with_noise_" + str(testnoise4))
+    fig = plt.figure()
+    test_Pred1 = denoise(tsX_noisy1, parameters)
+    test_Pred2 = denoise(tsX_noisy2, parameters)
+    test_Pred3 = denoise(tsX_noisy3, parameters)
+    test_Pred4 = denoise(tsX_noisy4, parameters)
+    print("accuracy of test sample 1 with  random noise" + str(testnoise1) + "is  " + str(
+        (1 - error(test_Pred1, test_data)) * 100) + "%")
+    print("accuracy of test sample 2 with random  noise" + str(testnoise2) + "is  " + str(
+        (1 - error(test_Pred2, test_data)) * 100) + "%")
+    print("accuracy of test sample 3 with random  noise" + str(testnoise3) + "is  " + str(
+        (1 - error(test_Pred3, test_data)) * 100) + "%")
+    print("accuracy of test sample 4 with random noise" + str(testnoise4) + "is  " + str(
+        (1 - error(test_Pred4, test_data)) * 100) + "%")
+    plt.imshow(test_Pred1[:, 10].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Denoised_random noise Test_Sample1")
+    plt.show()
+    fig.savefig("Denoised_random noise_Test_Sample1")
+    plt.imshow(test_Pred2[:, 10].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Denoised_random noiseTest_Sample2")
+    plt.show()
+    fig.savefig("Denoised_random noiseTest_Sample2")
+    plt.imshow(test_Pred3[:, 10].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Denoised_random noiseTest_Sample3")
+    plt.show()
+    fig.savefig("Denoised_random noiseTest_Sample3")
+    plt.imshow(test_Pred4[:, 10].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Denoised_random noiseTest_Sample4")
+    plt.show()
+    fig.savefig("Denoised_random noiseTest_Sample4")
+
+    plt.plot(costs, label='Training cost')
+
+    plt.title("training cost with learning rate =" + str(learning_rate) + "iterations" + str(
+        num_iterations) + "noise :" + str(noise))
+    plt.show()
+    fig.savefig("trainingCost")
     print("Total execution time: %s minutes!!" % ((time.time() - start_time) // 60))
 
 
