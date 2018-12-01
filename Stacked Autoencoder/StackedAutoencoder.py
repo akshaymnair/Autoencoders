@@ -83,14 +83,14 @@ class StackedAutoencoder:
         return classifier, unpacked_wb
 
     def fineTune(self, ftX, ftY, tsX, tsY, spc):
-        print "Fine Tuning Phase - {0} samples per class(SPC): In progress".format(str(spc))
+        print("Fine Tuning Phase - {0} samples per class(SPC): In progress".format(str(spc)))
         fine_tuned_solution = minimize(self.fineTuneFit, self.packed_auto_encoder_stack_with_softmax,
                                     args=(ftX, ftY,), method=self.method, jac=True,
                                     options={'maxiter': self.max_iterations, 'disp': True})
         fine_tuned_solution = fine_tuned_solution.x
         predictions = self.predict(tsX, fine_tuned_solution)
         correct = tsY[:, 0] == predictions[:, 0]
-        print "Fine Tuning Phase - {0} samples per class(SPC): Completed".format(spc)
+        print("Fine Tuning Phase - {0} samples per class(SPC): Completed".format(spc))
         return np.mean(correct)
 
     def fineTuneFit(self, packed_stack_with_softmax, X, Y):
@@ -129,7 +129,7 @@ class StackedAutoencoder:
         return [cost, gradient]
 
     def fit(self, trX, trY, tsX, tsY):
-        print "Training Phase - Model fitting: In progress"
+        print("Training Phase - Model fitting: In progress")
         i, features = 1, trX
         while i < len(self.network_dims) - 1:
             sparse_encoder = SparseAutoencoder(self.network_dims[i-1], self.network_dims[i], self.rho, self.lamda, self.beta)
@@ -151,7 +151,7 @@ class StackedAutoencoder:
         predictions = self.predict(tsX, self.packed_auto_encoder_stack_with_softmax)
         correct = tsY[:, 0] == predictions[:, 0]
         trAcc = np.mean(correct)
-        print "Training Phase - Model fitting: Completed"
+        print("Training Phase - Model fitting: Completed")
         return trAcc
 
     def plotGraph(self, title):
@@ -205,10 +205,10 @@ def SDA(show_cost_graph=True):
     ftAcc1 = sae.fineTune(ftX_1, ftY_1, tsX, tsY, spc=1)
     ftAcc5 = sae.fineTune(ftX_5, ftY_5, tsX, tsY, spc=5)
     ftAcc = sae.fineTune(trX, trY, tsX, tsY, spc='all')
-    print "Accuracy after training & softmax for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), trAcc)
-    print "Accuracy after fine-tuning with 1-labeled SPC for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc1)
-    print "Accuracy after fine-tuning with 5-labeled SPC for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc5)
-    print "Accuracy after fine-tuning with fullly labeled SPC  for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc)
+    print("Accuracy after training & softmax for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), trAcc))
+    print("Accuracy after fine-tuning with 1-labeled SPC for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc1))
+    print("Accuracy after fine-tuning with 5-labeled SPC for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc5))
+    print("Accuracy after fine-tuning with fullly labeled SPC  for {0} epochs on {1} hidden layers = {2}".format(args.epochs, str(args.hidden), ftAcc))
     if show_cost_graph:
         title = 'Training Cost vs Iteration - {0} epochs and {1} hidden layers'.format(args.epochs, str(args.hidden))
         sae.plotGraph(title)
