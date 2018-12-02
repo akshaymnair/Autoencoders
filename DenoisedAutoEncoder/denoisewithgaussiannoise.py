@@ -1,5 +1,4 @@
-# Python 3
-# Author: Akshay - #1212981859
+# Python 2.7
 
 import numpy as np
 from load_mnist import mnist
@@ -24,8 +23,8 @@ def tanh_der(dA, cache):
 
 
 def sigmoid(Z):
-    e = 0.00000000001
-    A = 1 / (1 + np.exp(-Z + e))
+    e=0.00001
+    A = 1 / (1 + np.exp(-Z+e))
     cache = {}
     cache["Z"] = Z
     return A, cache
@@ -177,13 +176,7 @@ def two_layer_network(X, Y, net_dims, num_iterations=2000, learning_rate=0.1):
 
 
 def masking_noise(X, v):
-    """ Apply masking noise to data in X, in other words a fraction v of elements of X
-    (chosen at random) is forced to zero.
-    :param X: array_like, Input data
-    :param v: int, fraction of elements to distort
-    :return: transformed data
-    """
-    X_noise = X.copy()
+    noisy_X = X.copy()
 
     n_samples = X.shape[0]
     n_features = X.shape[1]
@@ -192,55 +185,32 @@ def masking_noise(X, v):
         mask = np.random.randint(0, n_features, v)
 
         for m in mask:
-            X_noise[i][m] = 0.
+            noisy_X[i][m] = 0.
 
-    return X_noise
+    return noisy_X
 
 
-def get_corrupted_input(input, stddev):
+
+def get_corrupted_input( input, stddev):
     noise = np.random.normal(0, stddev, (input.shape[0], input.shape[1]))
-    # assert corruption_level < 1
-    # return np.binomial(size=input.shape, n=1,p=1-corruption_level) * input
-    return (input + noise * 0.1)
-
+    return (input+noise*0.2)
 
 def main():
     start_time = time.time()
     train_data, train_label, test_data, test_label = mnist()
-    # print(param)
-    # n_rows = train_data.shape[0]
-    # n_cols = train_data.shape[1]
-    # test_rows = test_data.shape[0]
-    # test_cols = test_label.shape[1]
 
-    # mean = 0.0
-    # stddev = 0.4
-    # noise = np.random.normal(mean, stddev, (n_rows, n_cols))
-    # trX_noisy = train_data + noise
-    # noise = np.random.normal(mean, stddev, (test_rows, test_cols))
-    # tsX_noisy = test_data + noise
-    noise = 0.1
-    testnoise1 = 0.2
-    testnoise2 = 0.3
-    testnoise3 = 0.4
-    testnoise4 = 0.5
-    trX_noisy = get_corrupted_input(train_data, noise)
-    tsX_noisy1 = get_corrupted_input(test_data, testnoise1)
+
+
+    noise=0.4
+    testnoise1=0.1
+    testnoise2=0.2
+    testnoise3=0.3
+    testnoise4=0.4
+    trX_noisy = get_corrupted_input(train_data,noise)
+    tsX_noisy1 =get_corrupted_input(test_data,testnoise1)
     tsX_noisy2 = get_corrupted_input(test_data, testnoise2)
     tsX_noisy3 = get_corrupted_input(test_data, testnoise3)
     tsX_noisy4 = get_corrupted_input(test_data, testnoise4)
-
-    # fig = plt.figure()
-    # plt.imshow(train_data[:, 999].reshape(28, -1))
-    # plt.title("Training_Sample")
-    # plt.show()
-    # fig.savefig("Training_Sample")
-    #
-    # fig = plt.figure()
-    # plt.imshow(trX_noisy[:, 999].reshape(28, -1))
-    # plt.title("Noisy_Training_Sample")
-    # plt.show()
-    # fig.savefig("Noisy_Training_Sample")
 
     n_in, m = train_data.shape
     n_fin, m = train_data.shape
@@ -253,80 +223,177 @@ def main():
     costs, parameters = two_layer_network(trX_noisy, train_data, net_dims, num_iterations=num_iterations,
                                           learning_rate=learning_rate)
 
-    # compute the accuracy for training set and testing set
-    # train_Pred = classify(train_data, parameters)
 
     fig = plt.figure()
-    plt.imshow(test_data[:, 50].reshape(28, -1), cmap=plt.cm.binary)
-    plt.title("Test_Sample")
+    plt.imshow(test_data[:, 20].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Test_Sample  with gaussian noise" + str(noise) + "is")
     plt.show()
-    fig.savefig("Test_Sample")
+    fig.savefig("Test_Sample with gaussian noise" + str(noise) + "is.png")
 
     fig = plt.figure()
-    plt.imshow(tsX_noisy1[:, 50].reshape(28, -1), cmap=plt.cm.binary)
-    plt.title("Noisy_Test_Sample1_with_binomial_noise_testnoise1")
+    plt.imshow(test_data[:, 80].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Test_Sample with gaussian noise" + str(noise) + "is")
     plt.show()
-    fig.savefig("Noisy_Test_Sample1_with_binomial_noise_testnoise1")
+    fig.savefig("Test_Sample 8with gaussian noise" + str(noise) + "is.png")
     fig = plt.figure()
-    plt.imshow(tsX_noisy2[:, 50].reshape(28, -1), cmap=plt.cm.binary)
-    plt.title("Noisy_Test_Sample 2 with binomial noise_testnoise2")
+    plt.imshow(test_data[:, 91].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Test_Sample with gaussian noise" + str(noise) + "is")
     plt.show()
-    fig.savefig("Noisy_Test_Sample2_with_binomial_noise_testnoise2")
+    fig.savefig("Test_Sample 9 with gaussian noise" + str(noise) + "is.png")
 
     fig = plt.figure()
-    plt.imshow(tsX_noisy3[:, 10].reshape(28, -1), cmap=plt.cm.binary)
-    plt.title("Noisy_Test_Sample 3 with  binomial noise:testnoise3")
+    plt.imshow(tsX_noisy1[:, 20].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample..with_gaussian_noise" + str(testnoise1) + "and train noise" + str(noise) + "is")
     plt.show()
-    fig.savefig("Noisy_Test_Sample_3_with _binomial_noise_testnoise3")
+    fig.savefig("Noisy_Test_Samplewith_gaussian_noise" + str(testnoise1) + "and train noise" + str(noise) + "is.png")
+    fig = plt.figure()
+    plt.imshow(tsX_noisy2[:, 20].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample withgaussiannoise" + str(testnoise2) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Noisy_Test_Sample with_gaussiannoise" + str(testnoise2) + "and train noise" + str(noise) + "is.png")
+    fig = plt.figure()
+    plt.imshow(tsX_noisy3[:, 20].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample with_gaussian_noise" + str(testnoise3) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Noisy_Test_Sample with_gaussian_noise" + str(testnoise3) + "and train noise" + str(noise) + "is.png")
 
     fig = plt.figure()
-
-    plt.imshow(tsX_noisy4[:, 50].reshape(28, -1), cmap=plt.cm.binary)
-    plt.title("Noisy_Test_Sample 4 with binomial noise:testnoise4")
+    plt.imshow(tsX_noisy4[:, 20].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample with_gaussian_noise" + str(testnoise4) + "and train noise" + str(noise) + "is")
     plt.show()
-    fig.savefig("Noisy_Test_Sample4_with_binomial_noise_testnoise4")
+    fig.savefig("Noisy_Test_Sample with_gaussian_noise" + str(testnoise4) + "and train noise" + str(noise) + "is.png")
+    fig = plt.figure()
+
+    fig = plt.figure()
+    plt.imshow(tsX_noisy1[:, 80].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample 8with_gaussian_noise" + str(testnoise1) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Noisy_Test_Sample8with_gaussian_noise" + str(testnoise1) + "and train noise" + str(noise) + "is.png")
+    fig = plt.figure()
+    plt.imshow(tsX_noisy2[:, 80].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample 8 with_gaussian_noise" + str(testnoise2) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Noisy_Test_Sample8 with_gaussian_noise" + str(testnoise2) + "and train noise" + str(noise) + "is.png")
+    fig = plt.figure()
+    plt.imshow(tsX_noisy3[:, 80].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample 8with_gaussian_noise" + str(testnoise3) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Noisy_Test_Sample 8with_gaussian_noise" + str(testnoise3) + "and train noise" + str(noise) + "is.png")
+
+    fig = plt.figure()
+    plt.imshow(tsX_noisy4[:, 80].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample 8with_gaussian_noise" + str(testnoise4) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Noisy_Test_Sample8 with_gaussian_noise" + str(testnoise4) + "and train noise" + str(noise) + "is.png")
+    fig = plt.figure()
+
+    fig = plt.figure()
+    plt.imshow(tsX_noisy1[:, 91].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample 9with_gaussian_noise" + str(testnoise1) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Noisy_Test_Sample8with_gaussian_noise" + str(testnoise1) + "and train noise" + str(noise) + "is.png")
+    fig = plt.figure()
+    plt.imshow(tsX_noisy2[:, 91].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample 9 with_gaussian_noise" + str(testnoise2) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Noisy_Test_Sample9 with_gaussian_noise" + str(testnoise2) + "and train noise" + str(noise) + "is.png")
+    fig = plt.figure()
+    plt.imshow(tsX_noisy3[:, 91].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample 9with_gaussian_noise" + str(testnoise3) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Noisy_Test_Sample 9 with_gaussian_noise" + str(testnoise3) + "and train noise" + str(noise) + "is.png")
+
+    fig = plt.figure()
+    plt.imshow(tsX_noisy4[:, 91].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("Noisy_Test_Sample 9 with_gaussian_noise" + str(testnoise4) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Noisy_Test_Sample 9 with_gaussian_noise" + str(testnoise4) + "and train noise" + str(noise) + "is.png")
+
 
     test_Pred1 = denoise(tsX_noisy1, parameters)
-    test_Pred2 = denoise(tsX_noisy2, parameters)
+    test_Pred2= denoise(tsX_noisy2, parameters)
     test_Pred3 = denoise(tsX_noisy3, parameters)
     test_Pred4 = denoise(tsX_noisy4, parameters)
-    print("accuracy of test sample 1 with  binomial noise" + str(testnoise1) + "is  " + str(
+    print("accuracy of test sample 1 with  gaussian noise" + str(testnoise1) + "is  " + str(
         (1 - error(test_Pred1, test_data)) * 100) + "%")
-    print("accuracy of test sample 2 with binomial  noise" + str(testnoise2) + "is  " + str(
+    print("accuracy of test sample 2 with gaussian  noise" + str(testnoise2) + "is  " + str(
         (1 - error(test_Pred2, test_data)) * 100) + "%")
-    print("accuracy of test sample 3 with binomial  noise" + str(testnoise3) + "is  " + str(
+    print("accuracy of test sample 3 with gaussian  noise" + str(testnoise3) + "is  " + str(
         (1 - error(test_Pred3, test_data)) * 100) + "%")
-    print("accuracy of test sample 4 with binomial noise" + str(testnoise4) + "is  " + str(
+    print("accuracy of test sample 4 with gaussian noise" + str(testnoise4) + "is  " + str(
         (1 - error(test_Pred4, test_data)) * 100) + "%")
     fig = plt.figure()
-    plt.imshow(test_Pred1[:, 50].reshape(28, -1), cmap=plt.cm.binary)
-    plt.title("Denoised_binomial noise Test_Sample1")
+    plt.imshow(test_Pred1[:, 20].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample with_gaussian_noise" + str(testnoise1) + "and train noise" + str(noise) + "is")
     plt.show()
-    fig.savefig("Denoised_binomial noise_Test_Sample1")
+
+    fig.savefig("Denoised_random noise_gaussian_Test_Sample op1")
     fig = plt.figure()
-    plt.imshow(test_Pred2[:, 50].reshape(28, -1), cmap=plt.cm.binary)
-    plt.title("Denoised_binomial noiseTest_Sample2")
+    plt.imshow(test_Pred2[:, 20].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample with_gaussian_noise" + str(testnoise2) + "and train noise" + str(noise) + "is")
     plt.show()
-    fig.savefig("Denoised_binomial noiseTest_Sample2")
+    fig.savefig("Denoised_gaussian noiseTest_Sample op2")
     fig = plt.figure()
-    plt.imshow(test_Pred3[:, 50].reshape(28, -1), cmap=plt.cm.binary)
-    plt.title("Denoised_binomial noiseTest_Sample3")
+    plt.imshow(test_Pred3[:, 20].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample with_gaussian_noise" + str(testnoise3) + "and train noise" + str(noise) + "is")
     plt.show()
-    fig.savefig("Denoised_binomial noiseTest_Sample3")
+    fig.savefig("Denoised_gaussian_noiseTest_Sample op3")
     fig = plt.figure()
-    plt.imshow(test_Pred4[:, 50].reshape(28, -1), cmap=plt.cm.binary)
-    plt.title("Denoised_binomial noiseTest_Sample4")
+    plt.imshow(test_Pred4[:, 20].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample with_gaussian_noise" + str(testnoise4) + "and train noise" + str(noise) + "is")
     plt.show()
-    fig.savefig("Denoised_binomial noiseTest_Sample4")
+    fig.savefig("Denoised_gaussian noiseTest_Sample op4")
+
+    fig = plt.figure()
+    plt.imshow(test_Pred1[:, 80].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample 8 with_gaussian_noise" + str(testnoise1) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Denoised_random noise_gaussian_Test_Sample8 op1")
+    fig = plt.figure()
+    plt.imshow(test_Pred2[:, 80].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample with_gaussian_noise" + str(testnoise2) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Denoised_random noiseTest_Sample 8 op2")
+    fig = plt.figure()
+    plt.imshow(test_Pred3[:, 80].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample with_gaussian_noise" + str(testnoise3) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Denoised_gaussian_noiseTest_Sample 8 op3")
+    fig = plt.figure()
+    plt.imshow(test_Pred4[:, 80].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample with_gaussian_noise" + str(testnoise4) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Denoised_gaussian noiseTest_Sample 8 op4")
+
+    fig = plt.figure()
+    plt.imshow(test_Pred1[:, 91].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample 9 with_gaussian_noise" + str(testnoise1) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Denoised_random noise_gaussian_Test_Sample9 op1")
+    fig = plt.figure()
+    plt.imshow(test_Pred2[:, 91].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample 9 with_random_noise" + str(testnoise2) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Denoised_gaussian noiseTest_Sample 9 op2")
+    fig = plt.figure()
+    plt.imshow(test_Pred3[:, 91].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample 9 with_gaussian_noise" + str(testnoise3) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Denoised_gaussian_noiseTest_Sample 9 op3")
+    fig = plt.figure()
+    plt.imshow(test_Pred4[:, 91].reshape(28, -1), cmap=plt.cm.binary)
+    plt.title("denoised_Sample 9 with_gaussian_noise" + str(testnoise4) + "and train noise" + str(noise) + "is")
+    plt.show()
+    fig.savefig("Denoised_gaussian noiseTest_Sample 9 op4")
 
     plt.plot(costs, label='Training cost')
 
-    plt.title("training cost with learning rate =" + str(learning_rate) + "iterations" + str(
-        num_iterations) + "noise :" + str(noise))
-    plt.show()
-    fig.savefig("trainingCost")
-    print("Total execution time: %s minutes!!" % ((time.time() - start_time) // 60))
 
+    plt.title("training cost with learning rate =" + str(learning_rate) + "iterations" + str(
+    num_iterations) + "noise :" + str(noise))
+    plt.show()
+    fig.savefig("training cost")
+    print("Total execution time: %s minutes!!" % ((time.time() - start_time) // 60))
 
 if __name__ == "__main__":
     main()
