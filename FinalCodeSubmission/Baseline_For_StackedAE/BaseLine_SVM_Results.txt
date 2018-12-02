@@ -1,0 +1,13 @@
+
+SVM Classifier with gamma = 0.1; Kernel = polynomial
+
+Accuracy of SVM Classifier:  0.8775
+====================================================================================================
+
+
+
+SVM Classifier with gamma = 0.1; Kernel = polynomial
+
+Accuracy of SVM Classifier:  0.8775
+====================================================================================================
+

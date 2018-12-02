@@ -1,0 +1,20 @@
+Unsupervised Classification on Fashion-MNIST using K-Means algorithm!
+
+Unique Clusters chosen from input:  10
+
+Finding accuracy of KMeans using SVM Classifier: 
+Parameters: gamma = 0.1, Kernel = polynomial
+Train labels = output of Kmeans train prediction, Test Label = output of Kmeans test prediction
+Accuracy: 0.5599
+====================================================================================================
+
+
+Unsupervised Classification on Fashion-MNIST using K-Means algorithm!
+
+Unique Clusters chosen from input:  10
+
+Finding accuracy of KMeans using SVM Classifier: 
+Accuracy: 0.56
+====================================================================================================
+
+

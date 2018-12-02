@@ -1,0 +1,14 @@
+
+Logical Regression classifier with Solver = 'lgfgs'
+
+Accuracy of Logical Regression classifier:  0.8414
+====================================================================================================
+
+
+
+Logical Regression classifier with Solver = 'lgfgs'
+
+Accuracy of Logical Regression classifier:  0.8414
+====================================================================================================
+
+
