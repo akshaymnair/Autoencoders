@@ -1,5 +1,5 @@
 1. https://github.com/mGalarnyk/Python_Tutorials/blob/master/Sklearn/Logistic_Regression/LogisticRegression_MNIST_Codementor.ipynb
 2. https://github.com/anujdutt9/Fashion-MNIST/blob/master/svm.py
 3. https://www.tensorflow.org/tutorials/keras/basic_classification
-4. 
+4. https://towardsdatascience.com/kmeans-clustering-for-classification-74b992405d0a
 
