@@ -72,38 +72,3 @@ def getGroundTruth(Y):
     indexes = np.arange(len(Y) + 1)
     ground_truth = csr_matrix((ones, Y, indexes)).todense().T
     return ground_truth
-
-
-def separate_train_val_data(noTotalTrainVal, noTrPerClass, noValPerClass, numClasses, train_val_data, train_val_label):
-    assert (noTotalTrainVal == (noTrPerClass + noValPerClass) * numClasses), 'data class division mismatch'
-    i, train_data, train_label, val_data, val_label = 0, None, None, None, None
-    while i < noTotalTrainVal:
-        itr_train_data = train_val_data[:, i:i + noTrPerClass]
-        itr_train_label = train_val_label[:, i:i + noTrPerClass]
-        itr_val_data = train_val_data[:, i + noTrPerClass:i +noTrPerClass + noValPerClass]
-        itr_val_label = train_val_label[:, i + noTrPerClass:i + noTrPerClass + noValPerClass]
-        if train_data is None:
-            train_data, train_label, val_data, val_label = itr_train_data, itr_train_label, itr_val_data, itr_val_label
-        else:
-            train_data = np.append(train_data, itr_train_data, axis=1)
-            train_label = np.append(train_label, itr_train_label, axis=1)
-            val_data = np.append(val_data, itr_val_data, axis=1)
-            val_label = np.append(val_label, itr_val_label, axis=1)
-        i += noTrPerClass + noValPerClass
-    return train_data, train_label, val_data, val_label
-
-
-def shuffleDataLabels(X, Y):
-    s = np.arange(X.shape[1])
-    np.random.shuffle(s)
-    X = X[:, s]
-    Y = (Y[:, s]).T
-    return X, Y
-
-
-def sample_finetuning_data(trX, trY, no_of_classes, samples_per_class=1):
-    total_data_size = trX.shape[-1]
-    no_val_per_class = (total_data_size - (no_of_classes * samples_per_class)) / no_of_classes
-    ftX, ftY, _, _ = separate_train_val_data(trX.shape[1], samples_per_class, no_val_per_class, no_of_classes, trX, trY)
-    ftX, ftY = shuffleDataLabels(ftX, ftY)
-    return ftX, ftY

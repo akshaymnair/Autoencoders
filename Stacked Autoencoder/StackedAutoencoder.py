@@ -178,24 +178,6 @@ def SDA(show_cost_graph=True):
     args = parser.parse_args()
     hidden_layers = [int(h) for h in args.hidden.strip('[').strip(']').split(',' if ',' in args.hidden else ' ')]
 
-    from load_fashion_mnist import load_fashion_mnist
-    trX1, trY1, tsX1, tsY1 = load_fashion_mnist()
-    trainX, trainY = helper.shuffleDataLabels(trX1, trY1)
-    testX, testY = helper.shuffleDataLabels(tsX1, tsY1)
-    ftX_51, ftY_51 = helper.sample_finetuning_data(trX1, trY1, args.output, samples_per_class=5)
-    ftX_11, ftY_11 = helper.sample_finetuning_data(trX1, trY1, args.output, samples_per_class=1)
-
-    # sae1 = StackedAutoencoder(input_size=args.input, hidden_layer_sizes=hidden_layers, output_size=args.output,
-    #                          max_iterations=args.epochs, method=args.method)
-    # sae1.runStackedAutoencoder(trainX, trainY, testX, testY)
-    # ftAcc_1 = sae1.fineTune(trainX, trainY, testX, testY)
-    # ftAcc5_1 = sae1.fineTune(ftX_51, ftY_51, tsX1, tsY1)
-    # ftAcc1_1 = sae1.fineTune(ftX_11, ftY_11, tsX1, tsY1)
-    # print "Accuracy after fine-tuning with 1-labeled samples per class = {0}".format(ftAcc1_1)
-    # print "Accuracy after fine-tuning with 5-labeled samples per class = {0}".format(ftAcc5_1)
-    # print "Accuracy after fine-tuning with train data as labeled samples = {0}".format(ftAcc_1)
-
-
     trX, trY, tsX, tsY = helper.loadFashionMNIST()
     ftX_1, ftY_1 = helper.filterMNIST(trX, trY, 1)
     ftX_5, ftY_5 = helper.filterMNIST(trX, trY, 5)
