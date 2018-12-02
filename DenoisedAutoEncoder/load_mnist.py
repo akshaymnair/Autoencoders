@@ -1,5 +1,4 @@
-# Python 3
-# Author: Akshay - #1212981859
+
 import numpy as np
 import os
 import pdb
@@ -17,7 +16,7 @@ def one_hot(x, n):
     return o_h
 
 
-def mnist(noTrSamples=1000, noTsSamples=100, digit_range=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], noTrPerClass=100,
+def mnist(noTrSamples=60000, noTsSamples=100, digit_range=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], noTrPerClass=6000,
           noTsPerClass=10):
     assert noTrSamples == noTrPerClass * len(digit_range), 'noTrSamples and noTrPerClass mismatch'
     assert noTsSamples == noTsPerClass * len(digit_range), 'noTrSamples and noTrPerClass mismatch'
@@ -81,7 +80,7 @@ def show(image, label):
     for i in range(1, columns * rows + 1):
         fig.add_subplot(rows, columns, i)
         plt.imshow(image[:, i].reshape(28, -1))
-        print(label[:, i])
+        print(label[:,i])
     plt.show()
 
 
@@ -98,9 +97,9 @@ def show(image, label):
 
 
 def main():
-    trX, trY, tsX1, tsY1 = mnist(noTrSamples=6000,
+    trX, trY, tsX1, tsY1 = mnist(noTrSamples=60000,
                                  noTsSamples=1400, digit_range=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-                                 noTrPerClass=600, noTsPerClass=700)
+                                 noTrPerClass=6000, noTsPerClass=700)
 
     trX, trY, tsX, tsY, vaX, vaY = mnist()
 
@@ -108,7 +107,7 @@ def main():
     print("Test sets: ", tsY.shape, tsX.shape)
     print("Train sets: ", trY.shape, trX.shape)
 
-    show(vaX, vaY)
+    show(vaX,vaY)
     # plt.imshow(vaX[:, 4].reshape(28, -1))
     # plt.show()
     # print(vaY[0, 4])
